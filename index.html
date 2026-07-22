@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RICARDINHO IA</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#08080a;color:#f4f4f6;font-family:-apple-system,sans-serif;overflow:hidden;user-select:none}
+#app{width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(216,30,44,.15),transparent 60%),#08080a}
+.titulo{font-size:18px;font-weight:700;letter-spacing:.2em;color:#8b8b95;text-transform:uppercase}
+.subtitulo{font-size:12px;letter-spacing:.15em;color:#3a3a42;text-transform:uppercase;margin-top:4px}
+.circle-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:260px;height:260px}
+.ring{position:absolute;border-radius:50%;border:1.5px solid rgba(216,30,44,.18);animation:rp 3s ease-in-out infinite}
+.r1{width:260px;height:260px}
+.r2{width:300px;height:300px;animation-delay:.4s;border-color:rgba(216,30,44,.10)}
+.r3{width:340px;height:340px;animation-delay:.8s;border-color:rgba(216,30,44,.06)}
+@keyframes rp{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.03)}}
+.ring.listen{border-color:rgba(216,30,44,.6);animation:rl 1s ease-in-out infinite}
+.r2.listen{border-color:rgba(216,30,44,.3);animation-delay:.15s}
+.r3.listen{border-color:rgba(216,30,44,.15);animation-delay:.3s}
+@keyframes rl{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.07);opacity:1}}
+.ring.speak{border-color:rgba(201,162,75,.6);animation:rs .6s ease-in-out infinite alternate}
+.r2.speak{border-color:rgba(201,162,75,.3);animation-delay:.1s}
+.r3.speak{border-color:rgba(201,162,75,.15);animation-delay:.2s}
+@keyframes rs{from{transform:scale(1)}to{transform:scale(1.09)}}
+.mic-btn{position:relative;z-index:10;width:190px;height:190px;border-radius:50%;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.07),transparent 60%),linear-gradient(145deg,#1e1e26,#0e0e14);box-shadow:0 0 0 1.5px rgba(255,255,255,.06),0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(216,30,44,.08),inset 0 1px 0 rgba(255,255,255,.06);transition:transform .15s}
+.mic-btn:active{transform:scale(.96)}
+.mic-btn.listen{background:linear-gradient(145deg,#2a0a0e,#160509);box-shadow:0 0 0 1.5px rgba(216,30,44,.3),0 20px 60px rgba(0,0,0,.6),0 0 60px rgba(216,30,44,.3),inset 0 1px 0 rgba(255,255,255,.06)}
+.mic-btn.speak{background:linear-gradient(145deg,#1e1808,#0e0d06);box-shadow:0 0 0 1.5px rgba(201,162,75,.3),0 20px 60px rgba(0,0,0,.6),0 0 60px rgba(201,162,75,.2),inset 0 1px 0 rgba(255,255,255,.06)}
+.mic-icon{width:42px;height:42px}
+.mic-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#8b8b95;transition:color .3s}
+.mic-btn.listen .mic-label{color:#D81E2C}
+.mic-btn.speak .mic-label{color:#C9A24B}
+.status{text-align:center;min-height:60px;padding:0 24px;max-width:460px}
+.status-txt{font-size:13px;color:#8b8b95;min-height:18px}
+.bubble{border-radius:14px;padding:12px 18px;font-size:14px;line-height:1.55;text-align:center;max-width:420px;display:none}
+.bubble.show{display:block}
+.q-bubble{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);color:#f4f4f6}
+.a-bubble{background:rgba(201,162,75,.07);border:1px solid rgba(201,162,75,.2);color:#f4f4f6}
+.dots{display:none;gap:6px;align-items:center;justify-content:center;margin-top:8px}
+.dots.show{display:flex}
+.dot{width:7px;height:7px;border-radius:50%;background:#D81E2C;animation:db 1.2s ease-in-out infinite}
+.dot:nth-child(2){animation-delay:.2s}
+.dot:nth-child(3){animation-delay:.4s}
+@keyframes db{0%,80%,100%{transform:scale(.7);opacity:.4}40%{transform:scale(1);opacity:1}}
+.bars{display:none;gap:3px;align-items:center;height:28px;justify-content:center;margin-top:8px}
+.bars.show{display:flex}
+.bar{width:3px;border-radius:2px;background:#C9A24B;animation:ba .8s ease-in-out infinite alternate}
+.bar:nth-child(1){height:10px}.bar:nth-child(2){height:18px;animation-delay:.1s}.bar:nth-child(3){height:24px;animation-delay:.05s}.bar:nth-child(4){height:16px;animation-delay:.15s}.bar:nth-child(5){height:22px;animation-delay:.08s}.bar:nth-child(6){height:12px;animation-delay:.12s}.bar:nth-child(7){height:8px;animation-delay:.18s}
+@keyframes ba{from{transform:scaleY(.4);opacity:.5}to{transform:scaleY(1);opacity:1}}
+.err{display:none;background:rgba(216,30,44,.12);border:1px solid rgba(216,30,44,.25);border-radius:10px;padding:8px 16px;font-size:12px;color:#e87a82;text-align:center;max-width:380px}
+.err.show{display:block}
+.footer{position:absolute;bottom:28px;font-size:10px;letter-spacing:.12em;color:#3a3a42;text-transform:uppercase}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- texto topo sempre visível -->
+  <div id="wakeWord" style="text-align:center;width:100%;">
+    <div style="font-size:clamp(42px,10vw,96px);font-weight:900;letter-spacing:.08em;color:#D81E2C;text-transform:uppercase;line-height:1;text-shadow:0 0 80px rgba(216,30,44,.45);">OI RICARDO</div>
+    <div id="wakeHint" style="font-size:clamp(12px,2.5vw,18px);letter-spacing:.2em;color:#3a3a42;margin-top:12px;text-transform:uppercase;">toque ou fale para começar</div>
+  </div>
+  <div id="mainUI" style="display:flex;flex-direction:column;align-items:center;gap:24px;width:100%">
+  <div class="circle-wrap">
+    <div class="ring r3" id="r3"></div>
+    <div class="ring r2" id="r2"></div>
+    <div class="ring r1" id="r1"></div>
+    <button class="mic-btn" id="micBtn">
+      <svg class="mic-icon" viewBox="0 0 44 44" fill="none">
+        <rect x="15" y="4" width="14" height="22" rx="7" fill="#f4f4f6" opacity=".85"/>
+        <path d="M8 22c0 7.732 6.268 14 14 14s14-6.268 14-14" stroke="#f4f4f6" stroke-width="2.5" stroke-linecap="round" opacity=".85"/>
+        <line x1="22" y1="36" x2="22" y2="42" stroke="#f4f4f6" stroke-width="2.5" stroke-linecap="round" opacity=".85"/>
+        <line x1="16" y1="42" x2="28" y2="42" stroke="#f4f4f6" stroke-width="2.5" stroke-linecap="round" opacity=".85"/>
+      </svg>
+      <span class="mic-label" id="micLabel">Toque para falar</span>
+    </button>
+  </div>
+  <div class="status">
+    <div class="status-txt" id="statusTxt"></div>
+    <div class="dots" id="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div class="bars" id="bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+    <div class="bubble q-bubble" id="qBubble"></div>
+    <div class="bubble a-bubble" id="aBubble"></div>
+    <div class="err" id="errBox"></div>
+  </div>
+
+  </div><!-- /mainUI -->
+  <div class="footer">Grupo R1 · Powered by OpenAI</div>
+</div>
+<script>
+const SYSTEM = `Você é o Ricardinho IA, assistente virtual do empresário Ricardo Nunes, fundador do Grupo R1 e da Ricardo Eletro. Inspire e oriente empreendedores com a sabedoria prática de Ricardo Nunes: direto, sem enrolação, energia de quem construiu um império do zero. Responda sempre em português brasileiro. Respostas curtas e impactantes — máximo 3 frases. Foco em negócios, vendas, mentalidade de dono, liderança.`;
+const KEY = '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';
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let state = 'idle', rec = null, hist = [];
+const micBtn=document.getElementById('micBtn'),micLabel=document.getElementById('micLabel'),statusTxt=document.getElementById('statusTxt'),qBubble=document.getElementById('qBubble'),aBubble=document.getElementById('aBubble'),dots=document.getElementById('dots'),bars=document.getElementById('bars'),errBox=document.getElementById('errBox'),r1=document.getElementById('r1'),r2=document.getElementById('r2'),r3=document.getElementById('r3');
+
+function ui(s){
+  state=s;
+  [r1,r2,r3].forEach(r=>{r.className='ring '+r.id});
+  dots.className='dots'+(s==='think'?' show':'');
+  bars.className='bars'+(s==='speak'?' show':'');
+  micBtn.className='mic-btn'+(s==='listen'?' listen':s==='speak'?' speak':'');
+  if(s==='idle'){
+    micLabel.textContent='';statusTxt.textContent='';statusTxt.style.color='';
+    document.getElementById('wakeHint').style.display='block';
+  }
+  else if(s==='listen'){
+    document.getElementById('wakeHint').style.display='none';
+    micLabel.textContent='Ouvindo...';statusTxt.textContent='Fale sua pergunta';statusTxt.style.color='#D81E2C';r1.className+=' listen';r2.className+=' listen';r3.className+=' listen';
+  }
+  else if(s==='think'){
+    document.getElementById('wakeHint').style.display='none';
+    micLabel.textContent='Pensando...';statusTxt.textContent='Processando resposta';statusTxt.style.color='';
+  }
+  else if(s==='speak'){
+    document.getElementById('wakeHint').style.display='none';
+    micLabel.textContent='Respondendo';statusTxt.textContent='Ricardinho está falando';statusTxt.style.color='#C9A24B';r1.className+=' speak';r2.className+=' speak';r3.className+=' speak';
+  }
+}
+function showErr(m){errBox.textContent=m;errBox.className='err show';setTimeout(()=>errBox.className='err',5000)}
+function resetB(){qBubble.className='bubble q-bubble';aBubble.className='bubble a-bubble'}
+
+// ── WAKE WORD ──────────────────────────────────────────────
+let wakeRec=null, wakeActive=false;
+
+function startWake(){
+  if(!SR||wakeActive)return;
+  wakeRec=new SR();
+  wakeRec.lang='pt-BR';
+  wakeRec.interimResults=true;
+  wakeRec.continuous=false;
+  wakeRec.onresult=e=>{
+    let txt='';
+    for(let x=0;x<e.results.length;x++) txt+=e.results[x][0].transcript;
+    txt=txt.toLowerCase();
+    if(txt.includes('oi ricardo')||txt.includes('oi ricardinho')||txt.includes('olá ricardo')){
+      wakeRec.stop();
+      wakeActive=false;
+      setTimeout(startListen,300);
+    }
+  };
+  wakeRec.onend=()=>{wakeActive=false;if(state==='idle')setTimeout(startWake,500)};
+  wakeRec.onerror=()=>{wakeActive=false;if(state==='idle')setTimeout(startWake,2000)};
+  try{wakeRec.start();wakeActive=true}catch(e){setTimeout(startWake,2000)}
+}
+
+// ── MAIN RECOGNITION ───────────────────────────────────────
+if(SR){
+  rec=new SR();
+  rec.lang='pt-BR';
+  rec.interimResults=true;
+  rec.continuous=false;
+  rec.onresult=e=>{
+    let f='',i='';
+    for(let x=e.resultIndex;x<e.results.length;x++){const t=e.results[x][0].transcript;e.results[x].isFinal?f+=t:i+=t}
+    const d=f||i;
+    if(d){qBubble.textContent='"'+d+'"';qBubble.className='bubble q-bubble show'}
+  };
+  rec.onend=()=>{
+    const t=qBubble.textContent.replace(/^"|"$/g,'').trim();
+    if(state==='listen'&&t.length>1)send(t);
+    else if(state==='listen'){ui('idle');resetB();showErr('Não ouvi nada. Tente novamente.')}
+    if(state==='idle')setTimeout(startWake,500);
+  };
+  rec.onerror=e=>{
+    ui('idle');
+    if(e.error==='not-allowed')showErr('Permissão de microfone negada. Autorize no Chrome.');
+    else if(e.error==='no-speech'){showErr('Nenhuma fala detectada. Tente novamente.');resetB()}
+    else showErr('Erro: '+e.error);
+    setTimeout(startWake,2000);
+  };
+}
+
+function startListen(){
+  resetB();ui('listen');
+  try{rec.start()}catch(e){console.error(e)}
+}
+
+micBtn.onclick=()=>{
+  if(state==='think'||state==='speak'){speechSynthesis.cancel();ui('idle');resetB();startWake();return}
+  if(state==='listen'){rec.stop();return}
+  startListen();
+};
+
+// inicia wake word automaticamente
+setTimeout(startWake, 1000);
+
+async function send(txt){
+  ui('think');
+  hist.push({role:'user',content:txt});
+  if(hist.length>6)hist=hist.slice(-6);
+  try{
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEY},
+      body:JSON.stringify({model:'gpt-4o-mini',max_tokens:300,messages:[{role:'system',content:SYSTEM},...hist]})
+    });
+    if(!r.ok)throw new Error('API '+r.status);
+    const d=await r.json();
+    const reply=d.choices?.[0]?.message?.content||'';
+    hist.push({role:'assistant',content:reply});
+    aBubble.textContent=reply;
+    aBubble.className='bubble a-bubble show';
+    qBubble.className='bubble q-bubble';
+    fala(reply);
+  }catch(e){console.error(e);ui('idle');resetB();showErr('Erro de conexão. Verifique a internet.')}
+}
+
+async function fala(txt){
+  ui('speak');
+  try{
+    const r=await fetch('/.netlify/functions/tts',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:txt})
+    });
+    if(!r.ok){
+      const err=await r.text();
+      showErr('Erro TTS: '+r.status+' '+err);
+      ui('idle');resetB();return;
+    }
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob);
+    const audio=new Audio(url);
+    audio.onended=()=>{URL.revokeObjectURL(url);setTimeout(()=>{ui('idle');resetB()},2000)};
+    audio.onerror=(e)=>{showErr('Erro audio: '+e.message);URL.revokeObjectURL(url);ui('idle');resetB()};
+    await audio.play();
+  }catch(e){
+    showErr('Erro: '+e.message);
+    ui('idle');resetB();
+  }
+}
+</script>
+</body>
+</html>
